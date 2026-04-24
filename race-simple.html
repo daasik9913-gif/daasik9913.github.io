@@ -371,16 +371,20 @@
 
             let score = 0;
             let distance = 0;
-            let playerX = 180;
-            let playerY = 250;
             let gameActive = true;
             let spawnCount = 0;
             let health = 3;  // 체력
             let currentStage = 0;  // 현재 스테이지 (0 = Stage 1)
 
             const charSpeed = chars[selectedChar].speed;
-            const gameWidth = 400;
-            const gameHeight = 600;
+
+            // 실제 게임 컨테이너 크기 계산 (반응형 대응)
+            const rect = gameDiv.getBoundingClientRect();
+            const gameWidth = rect.width || 400;
+            const gameHeight = rect.height || 600;
+
+            let playerX = gameWidth / 2 - 20;  // 중앙에서 시작
+            let playerY = gameHeight / 2 + 50;
 
             // 입력 처리
             let leftPressed = false;
@@ -1057,35 +1061,75 @@
                 const result = document.createElement('div');
                 result.style.cssText = `
                     position: absolute;
+                    top: 0;
+                    left: 0;
                     width: 100%;
                     height: 100%;
-                    background: rgba(0,0,0,0.9);
+                    background: rgba(0,0,0,0.95);
                     display: flex;
                     flex-direction: column;
                     justify-content: center;
                     align-items: center;
-                    gap: 20px;
-                    z-index: 200;
+                    gap: 30px;
+                    z-index: 300;
                     color: white;
                     font-size: 40px;
                     font-weight: bold;
                 `;
-                result.innerHTML = `
-                    <div>🏁 경주 종료!</div>
-                    <div style="font-size: 48px; color: #FFD700;">점수: ${finalScore}</div>
-                    <button onclick="location.reload()" style="
-                        width: 200px;
-                        height: 60px;
-                        font-size: 24px;
-                        background: #00AA00;
-                        color: black;
-                        border: none;
-                        border-radius: 8px;
-                        cursor: pointer;
-                        font-weight: bold;
-                    ">다시 하기</button>
+
+                // 메인 콘텐츠
+                const titleDiv = document.createElement('div');
+                titleDiv.textContent = '🏁 경주 종료!';
+                titleDiv.style.fontSize = '48px';
+
+                const scoreDiv = document.createElement('div');
+                scoreDiv.textContent = `점수: ${finalScore}`;
+                scoreDiv.style.fontSize = '56px';
+                scoreDiv.style.color = '#FFD700';
+
+                // 다시하기 버튼
+                const btn = document.createElement('button');
+                btn.textContent = '다시 하기';
+                btn.style.cssText = `
+                    width: 200px;
+                    height: 70px;
+                    font-size: 28px;
+                    background: #00AA00;
+                    color: #000;
+                    border: 3px solid #00FF00;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    font-weight: bold;
+                    margin-top: 20px;
+                    transition: all 0.2s;
                 `;
-                document.getElementById('gameContainer').appendChild(result);
+
+                // 버튼 호버 효과
+                btn.onmouseover = () => {
+                    btn.style.background = '#00FF00';
+                    btn.style.transform = 'scale(1.05)';
+                };
+                btn.onmouseout = () => {
+                    btn.style.background = '#00AA00';
+                    btn.style.transform = 'scale(1)';
+                };
+
+                // 버튼 클릭
+                btn.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    location.reload();
+                };
+
+                result.appendChild(titleDiv);
+                result.appendChild(scoreDiv);
+                result.appendChild(btn);
+
+                const container = document.getElementById('gameContainer');
+                container.appendChild(result);
+
+                // 포커스를 버튼에 설정
+                btn.focus();
             }
         }
 
