@@ -416,14 +416,91 @@
                 if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') downPressed = false;
             });
 
-            // 터치/마우스 입력 처리 함수
-            function handlePointerMove(x, y) {
+            // 터치 조이스틱 방식 - 손가락 움직임으로 조종
+            let touchStartX = 0;
+            let touchStartY = 0;
+            let isTouching = false;
+            const touchDeadzone = 25;  // 25px 이상 움직여야 인식
+
+            // 터치 시작 - 현재 위치 기록
+            gameDiv.addEventListener('touchstart', (e) => {
+                if (e.touches.length > 0) {
+                    const touch = e.touches[0];
+                    touchStartX = touch.clientX;
+                    touchStartY = touch.clientY;
+                    isTouching = true;
+                    e.preventDefault();
+                }
+            }, { passive: false });
+
+            // 터치 이동 - 손가락 움직임 감지
+            document.addEventListener('touchmove', (e) => {
+                if (!keyboardActive && isTouching && e.touches.length > 0) {
+                    const touch = e.touches[0];
+
+                    // 터치 시작점에서 현재 위치까지의 거리
+                    const deltaX = touch.clientX - touchStartX;
+                    const deltaY = touch.clientY - touchStartY;
+
+                    // 좌우 이동 (가로 움직임 감지)
+                    if (Math.abs(deltaX) > touchDeadzone) {
+                        if (deltaX < 0) {
+                            // 왼쪽으로 움직임
+                            leftPressed = true;
+                            rightPressed = false;
+                        } else {
+                            // 오른쪽으로 움직임
+                            rightPressed = true;
+                            leftPressed = false;
+                        }
+                    } else {
+                        leftPressed = false;
+                        rightPressed = false;
+                    }
+
+                    // 상하 이동 (세로 움직임 감지)
+                    if (Math.abs(deltaY) > touchDeadzone) {
+                        if (deltaY < 0) {
+                            // 위쪽으로 움직임
+                            upPressed = true;
+                            downPressed = false;
+                        } else {
+                            // 아래쪽으로 움직임
+                            downPressed = true;
+                            upPressed = false;
+                        }
+                    } else {
+                        upPressed = false;
+                        downPressed = false;
+                    }
+
+                    e.preventDefault();
+                }
+            }, { passive: false });
+
+            // 터치 끝 - 입력 해제
+            document.addEventListener('touchend', (e) => {
+                isTouching = false;
+                if (!keyboardActive) {
+                    leftPressed = false;
+                    rightPressed = false;
+                    upPressed = false;
+                    downPressed = false;
+                }
+            }, { passive: false });
+
+            // PC에서의 마우스 입력 (기존 방식 유지)
+            gameDiv.addEventListener('mousemove', (e) => {
+                const rect = gameDiv.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
                 if (!keyboardActive) {
                     // 좌우 이동
                     if (x < gameWidth / 3) {
                         leftPressed = true;
                         rightPressed = false;
-                    } else if (x > gameWidth * 2 / 3) {
+                    } else if (x > (gameWidth * 2) / 3) {
                         rightPressed = true;
                         leftPressed = false;
                     } else {
@@ -432,10 +509,11 @@
                     }
 
                     // 상하 이동
-                    if (y < gameHeight / 3) {
+                    const thirdHeight = gameHeight / 3;
+                    if (y < thirdHeight) {
                         upPressed = true;
                         downPressed = false;
-                    } else if (y > gameHeight * 2 / 3) {
+                    } else if (y > (gameHeight * 2) / 3) {
                         downPressed = true;
                         upPressed = false;
                     } else {
@@ -443,48 +521,10 @@
                         downPressed = false;
                     }
                 }
-            }
-
-            // 마우스 입력 (키보드가 없으면만)
-            gameDiv.addEventListener('mousemove', (e) => {
-                const rect = gameDiv.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                handlePointerMove(x, y);
             });
 
-            // 터치 입력 (핸드폰)
-            gameDiv.addEventListener('touchmove', (e) => {
-                e.preventDefault();  // 화면 스크롤 방지
-                const rect = gameDiv.getBoundingClientRect();
-                const touch = e.touches[0];  // 첫 번째 터치 포인트
-                const x = touch.clientX - rect.left;
-                const y = touch.clientY - rect.top;
-                handlePointerMove(x, y);
-            }, { passive: false });
-
-            // 터치 시작
-            gameDiv.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                const rect = gameDiv.getBoundingClientRect();
-                const touch = e.touches[0];
-                const x = touch.clientX - rect.left;
-                const y = touch.clientY - rect.top;
-                handlePointerMove(x, y);
-            }, { passive: false });
-
-            // 터치/마우스가 나가면 입력 해제
+            // 마우스가 나가면 입력 해제
             gameDiv.addEventListener('mouseleave', () => {
-                if (!keyboardActive) {
-                    leftPressed = false;
-                    rightPressed = false;
-                    upPressed = false;
-                    downPressed = false;
-                }
-            });
-
-            // 터치 끝
-            gameDiv.addEventListener('touchend', () => {
                 if (!keyboardActive) {
                     leftPressed = false;
                     rightPressed = false;
