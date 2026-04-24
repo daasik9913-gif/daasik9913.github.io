@@ -416,13 +416,8 @@
                 if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') downPressed = false;
             });
 
-            // 터치/마우스 입력 (키보드가 없으면만)
-            gameDiv.addEventListener('mousemove', (e) => {
-                const rect = gameDiv.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-
-                // 키보드 입력이 없을 때만 마우스 입력 적용
+            // 터치/마우스 입력 처리 함수
+            function handlePointerMove(x, y) {
                 if (!keyboardActive) {
                     // 좌우 이동
                     if (x < gameWidth / 3) {
@@ -448,10 +443,48 @@
                         downPressed = false;
                     }
                 }
+            }
+
+            // 마우스 입력 (키보드가 없으면만)
+            gameDiv.addEventListener('mousemove', (e) => {
+                const rect = gameDiv.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                handlePointerMove(x, y);
             });
 
-            // 마우스가 나가면 입력 해제
+            // 터치 입력 (핸드폰)
+            gameDiv.addEventListener('touchmove', (e) => {
+                e.preventDefault();  // 화면 스크롤 방지
+                const rect = gameDiv.getBoundingClientRect();
+                const touch = e.touches[0];  // 첫 번째 터치 포인트
+                const x = touch.clientX - rect.left;
+                const y = touch.clientY - rect.top;
+                handlePointerMove(x, y);
+            }, { passive: false });
+
+            // 터치 시작
+            gameDiv.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                const rect = gameDiv.getBoundingClientRect();
+                const touch = e.touches[0];
+                const x = touch.clientX - rect.left;
+                const y = touch.clientY - rect.top;
+                handlePointerMove(x, y);
+            }, { passive: false });
+
+            // 터치/마우스가 나가면 입력 해제
             gameDiv.addEventListener('mouseleave', () => {
+                if (!keyboardActive) {
+                    leftPressed = false;
+                    rightPressed = false;
+                    upPressed = false;
+                    downPressed = false;
+                }
+            });
+
+            // 터치 끝
+            gameDiv.addEventListener('touchend', () => {
                 if (!keyboardActive) {
                     leftPressed = false;
                     rightPressed = false;
