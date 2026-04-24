@@ -20,7 +20,7 @@
             background: #87CEEB;
             border: 3px solid #333;
             position: relative;
-            overflow: hidden;
+            overflow: visible;
             cursor: pointer;
         }
         #menu {
@@ -1060,18 +1060,18 @@
 
                 const result = document.createElement('div');
                 result.style.cssText = `
-                    position: absolute;
+                    position: fixed;
                     top: 0;
                     left: 0;
-                    width: 100%;
-                    height: 100%;
+                    width: 100vw;
+                    height: 100vh;
                     background: rgba(0,0,0,0.95);
                     display: flex;
                     flex-direction: column;
                     justify-content: center;
                     align-items: center;
                     gap: 30px;
-                    z-index: 300;
+                    z-index: 9999;
                     color: white;
                     font-size: 40px;
                     font-weight: bold;
@@ -1089,15 +1089,15 @@
 
                 // 다시하기 버튼
                 const btn = document.createElement('button');
-                btn.textContent = '다시 하기';
+                btn.textContent = '🔄 다시 하기';
                 btn.style.cssText = `
-                    width: 200px;
-                    height: 70px;
-                    font-size: 28px;
+                    width: 220px;
+                    height: 80px;
+                    font-size: 30px;
                     background: #00AA00;
                     color: #000;
-                    border: 3px solid #00FF00;
-                    border-radius: 8px;
+                    border: 4px solid #00FF00;
+                    border-radius: 10px;
                     cursor: pointer;
                     font-weight: bold;
                     margin-top: 20px;
@@ -1105,28 +1105,40 @@
                 `;
 
                 // 버튼 호버 효과
-                btn.onmouseover = () => {
+                btn.addEventListener('mouseover', () => {
                     btn.style.background = '#00FF00';
-                    btn.style.transform = 'scale(1.05)';
-                };
-                btn.onmouseout = () => {
+                    btn.style.transform = 'scale(1.1)';
+                });
+                btn.addEventListener('mouseout', () => {
                     btn.style.background = '#00AA00';
                     btn.style.transform = 'scale(1)';
-                };
+                });
 
-                // 버튼 클릭
-                btn.onclick = (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    location.reload();
-                };
+                // 버튼 클릭 - 메뉴로 돌아가기
+                btn.addEventListener('click', function() {
+                    // 결과 화면 제거
+                    result.remove();
+
+                    // 게임 초기화
+                    document.getElementById('game').style.display = 'none';
+                    document.getElementById('menu').style.display = 'flex';
+
+                    // 메뉴 배경색 복원
+                    document.getElementById('gameContainer').style.background = '#667eea';
+
+                    // 선택 상태 초기화
+                    selectedChar = null;
+                    selectedStage = null;
+                    document.querySelectorAll('button').forEach(b => {
+                        b.classList.remove('selected');
+                    });
+                });
 
                 result.appendChild(titleDiv);
                 result.appendChild(scoreDiv);
                 result.appendChild(btn);
 
-                const container = document.getElementById('gameContainer');
-                container.appendChild(result);
+                document.body.appendChild(result);
 
                 // 포커스를 버튼에 설정
                 btn.focus();
