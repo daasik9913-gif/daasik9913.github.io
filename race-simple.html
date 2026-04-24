@@ -1114,24 +1114,11 @@
                     btn.style.transform = 'scale(1)';
                 });
 
-                // 버튼 클릭 - 메뉴로 돌아가기
+                // 버튼 클릭 - 페이지 새로고침으로 완벽한 초기화
                 btn.addEventListener('click', function() {
-                    // 결과 화면 제거
-                    result.remove();
-
-                    // 게임 초기화
-                    document.getElementById('game').style.display = 'none';
-                    document.getElementById('menu').style.display = 'flex';
-
-                    // 메뉴 배경색 복원
-                    document.getElementById('gameContainer').style.background = '#667eea';
-
-                    // 선택 상태 초기화
-                    selectedChar = null;
-                    selectedStage = null;
-                    document.querySelectorAll('button').forEach(b => {
-                        b.classList.remove('selected');
-                    });
+                    setTimeout(() => {
+                        location.reload();
+                    }, 300);
                 });
 
                 result.appendChild(titleDiv);
